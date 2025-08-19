@@ -78,7 +78,7 @@ func TestRender(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Render(tt.template, tt.data) // Call your Render function
+			got, err := Render(tt.template, tt.data)
 			if err != nil {
 				t.Fatalf("Render returned an unexpected error: %v", err)
 			}
