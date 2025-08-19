@@ -1,28 +1,34 @@
 package template
 
 import (
-	"regexp"
+	"strings"
 )
 
 func Render(tmpl string, data map[string]string) (string, error) {
-	pattern := `{{\s*([a-zA-Z]+)\s*}}`
+	newStartIndex := 0
+	for {
+		firstIndex := strings.Index(tmpl[newStartIndex:], "{{")
+		if firstIndex == -1 {
+			break
+		}
+		firstIndex += newStartIndex
 
-	re, err := regexp.Compile(pattern)
-	if err != nil {
-		return "", err
-	}
+		end := strings.Index(tmpl[firstIndex+2:], "}}")
+		if end == -1 {
+			break
+		}
+		lastIndex := end + firstIndex + 2
 
-	out := re.ReplaceAllStringFunc(tmpl, func(m string) string {
-		sub := re.FindStringSubmatch(m)
-		if len(sub) == 2 {
-			key := sub[1]
-			if val, ok := data[key]; ok {
-				return val
-			}
+		key := strings.TrimSpace(tmpl[firstIndex+2:lastIndex])
+
+		val, exists := data[key]
+		toInsert := tmpl[firstIndex:lastIndex+2]
+		if exists {
+			toInsert = val
 		}
 
-		return m
-	})
-
-	return out, nil
+		tmpl = tmpl[:firstIndex] + toInsert + tmpl[lastIndex+2:]
+		newStartIndex = firstIndex + len(toInsert)
+	}
+	return tmpl, nil
 }
