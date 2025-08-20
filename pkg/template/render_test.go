@@ -1,11 +1,60 @@
-package template // Or whatever package your Render function is in
+package template
 
 import (
 	"testing"
 )
 
-// You might need to add other imports if your Render function uses them,
-// like "errors" if you had specific error returns earlier that you removed.
+func TestRenderConditionals(t *testing.T) {
+	tests := []struct{
+		name     string
+		template string
+		data     map[string]string
+		expected string
+	}{
+		{
+			name:     "Test Case 1: key present and “true”",
+			template: "{{ if IsAdmin }}Welcome Admin!{{ else }}Welcome User!{{ end }}",
+			data:     map[string]string{"IsAdmin": "true"},
+			expected: "Welcome Admin!",
+		},
+		{
+			name:     "Test Case 2: key present and “false”",
+			template: "{{ if IsAdmin }}Welcome Admin!{{ else }}Welcome User!{{ end }}",
+			data:     map[string]string{"IsAdmin": "false"},
+			expected: "Welcome User!",
+		},
+		{
+			name:     "Test Case 3: key NOT present",
+			template: "{{ if IsAdmin }}Welcome Admin!{{ else }}Welcome User!{{ end }}",
+			data:     map[string]string{},
+			expected: "Welcome User!",
+		},
+		{
+			name:     "Test Case 4: More complex content inside branches",
+			template: "{{ if IsAdmin }}Hello, {{Name}}!{{ else }}Please log in.{{ end }}",
+			data:     map[string]string{"IsAdmin": "true", "Name": "Bo"},
+			expected: "Hello, {{Name}}!",
+		},
+		{
+			name:     "Test Case 5: Multiple branches",
+			template: `{{ if IsAdmin }}Welcome Admin!{{ else }}Welcome User!{{ end }} Some content...{{ if Verified }}Enjoy full features.{{ else }}Please verify your email.{{ end }}`,
+			data : map[string]string{"IsAdmin": "false", "Verified": "true"},
+			expected: "Welcome User! Some content...Enjoy full features.",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := renderConditionals(tt.template, tt.data)
+			if err != nil {
+				t.Fatalf("Render returned an unexpected error: %v", err)
+			}
+			if res != tt.expected {
+				t.Errorf("Expected: %q\n Got: %q", tt.expected, res)
+			}
+		})
+	}
+}
 
 func TestRender(t *testing.T) {
 	tests := []struct {
@@ -74,6 +123,12 @@ func TestRender(t *testing.T) {
             data:     map[string]string{"Name": "Julia"},
             expected: "Julia and Julia again!",
         },
+		{
+			name:     "Placeholder content inside branches",
+			template: "{{ if IsAdmin }}Hello, {{Name}}!{{ else }}Please log in.{{ end }}",
+			data:     map[string]string{"IsAdmin": "true", "Name": "Bo"},
+			expected: "Hello, Bo!",
+		},
 	}
 
 	for _, tt := range tests {
