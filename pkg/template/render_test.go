@@ -133,12 +133,9 @@ func TestRender(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Render(tt.template, tt.data)
-			if err != nil {
-				t.Fatalf("Render returned an unexpected error: %v", err)
-			}
-			if got != tt.expected {
-				t.Errorf("Render() got = %q, want %q", got, tt.expected)
+			res, _ := Render(tt.template, tt.data)
+			if res != tt.expected {
+				t.Errorf("Render() got = %q, want %q", res, tt.expected)
 			}
 		})
 	}

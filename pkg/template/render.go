@@ -1,6 +1,7 @@
 package template
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -17,7 +18,7 @@ func renderConditionals(tmpl string, data map[string]string) (string, error) {
 		keyStart := ifBlockStart + len(open)
 		ifBlockEndIndex := strings.Index(tmpl[keyStart:], close)
 		if ifBlockEndIndex == -1 {
-			break
+			return tmpl, fmt.Errorf("missing closing '}}' after if block")
 		}
 		ifBlockEndIndex = ifBlockEndIndex + keyStart
 		key := strings.TrimSpace(tmpl[keyStart:ifBlockEndIndex])
@@ -30,7 +31,8 @@ func renderConditionals(tmpl string, data map[string]string) (string, error) {
 
 		elseCondIndex := strings.Index(tmpl[trueBlock:], elseMarker)
 		if elseCondIndex == -1 {
-			break
+			return tmpl, fmt.Errorf("missing closing '{{ else }}' for conditional")
+
 		}
 		elseCondIndex = elseCondIndex + trueBlock
 
@@ -38,7 +40,7 @@ func renderConditionals(tmpl string, data map[string]string) (string, error) {
 
 		endCondIndex := strings.Index(tmpl[elseBlock:], endMarker)
 		if endCondIndex == -1 {
-			break
+			return tmpl, fmt.Errorf("missing closing '{{ end }}' for conditional")
 		}
 		endCondIndex = endCondIndex + elseBlock
 
@@ -74,7 +76,8 @@ func Render(tmpl string, data map[string]string) (string, error) {
 
 		end := strings.Index(processed[firstIndex+2:], "}}")
 		if end == -1 {
-			break
+			return processed, fmt.Errorf("missing closing '}}'")
+
 		}
 		lastIndex := end + firstIndex + 2
 
